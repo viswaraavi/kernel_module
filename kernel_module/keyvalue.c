@@ -32,7 +32,7 @@
 #include "keyvalue.h"
 
 #include <asm/uaccess.h>
-#include <linux/slab.h>
+#include <linux/slab.h> 
 #include <linux/kernel.h>
 #include <linux/errno.h>
 #include <linux/mm.h>
@@ -304,6 +304,9 @@ static void free_callback(void *data)
 static long keyvalue_get(struct keyvalue_get __user *ukv)
 {
     struct keyvalue_get kv;
+    
+    printk("%d",*ukv-> key)
+    
 
     return transaction_id++;
 }
