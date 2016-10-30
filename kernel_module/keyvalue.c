@@ -42,9 +42,9 @@
 #include <linux/moduleparam.h>
 #include <linux/poll.h>
 
-#define unsigned long long int INT64 
+#define unsigned long long int INT64; 
 
-unsigned transaction_id;
+unsigned int transaction_id;
 
 struct node
 {
@@ -73,10 +73,10 @@ int mymax(int a, int b)
 }
  
 
-struct node* newNode(INT64 key,INT64 size.void* data)
+struct node* newNode(INT64 key,INT64 size,void* data)
 {
     struct node* node = (struct node*)
-                        kmalloc(sizeof(struct node),__GPF_REPEAT);
+                        kmalloc(sizeof(struct node),__GFP_REPEAT);
     node->key   = key;
     node->left   = NULL;
     node ->size=size;
@@ -139,6 +139,13 @@ struct node* insert(struct node* node, INT64 key, INT64 size, void *value)
  
     if (key < node->key)
         node->left  = insert(node->left, key,size,value);
+    else if(key==node ->key)
+    {
+        node -> size=size;
+        node ->value=value;
+          
+    }
+    
     else
         node->right = insert(node->right, key,size,value);
  
@@ -312,7 +319,7 @@ static long keyvalue_get(struct keyvalue_get __user *ukv)
     if(srchnode==NULL)
         return -1;
     ukv -> data=srchnode -> data;
-    ukv -> size=srchnode ->size;
+    *(ukv -> size)=srchnode ->size;
       
     return transaction_id++;
 }
@@ -328,7 +335,7 @@ static long keyvalue_delete(struct keyvalue_delete __user *ukv)
 {
     //struct keyvalue_delete kv;
     if(search(root, ukv ->key) ==NULL)
-        return -1
+        return -1;
     
     root=deleteNode(root, ukv->key);
     return transaction_id++;
