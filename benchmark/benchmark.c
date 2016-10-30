@@ -9,6 +9,7 @@ int main(int argc, char *argv[])
 {
     int i=0,number_of_threads = 1, number_of_keys=1024, number_of_transactions = 65536; 
     int a;
+    void *getdata;
     int tid;
     __u64 size;
     char data[1024];
@@ -36,12 +37,12 @@ int main(int argc, char *argv[])
         tid = kv_set(devfd,i,strlen(data),data);
         fprintf(stderr,"S\t%d\t%d\t%d\t%s\n",tid,i,strlen(data),data);
     }
-/*    for(i = 0; i < number_of_transactions; i++)
+  for(i = 0; i < number_of_transactions; i++)
     {
-        tid = kv_get(devfd,i,size,&a);
-        fprintf(stderr,"G\t%d\t%d\t%d\n",tid,sizeof(int),a);
+        tid = kv_get(devfd,i,size,getdata);
+        fprintf(stderr,"G\t%d\t%d\t%d\t%s\n",tid,i,size,(char*)getdata);
         
-    }*/
+    }
     close(devfd);
     return 0;
 }
