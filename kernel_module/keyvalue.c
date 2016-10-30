@@ -42,15 +42,15 @@
 #include <linux/moduleparam.h>
 #include <linux/poll.h>
 
-
-#define NULL (void*)0 
+#define unsigned long long int INT64 
 
 unsigned transaction_id;
 
 struct node
 {
-    int key;
-    char *data;
+    INT64 key;
+    void *data;
+    INT64 size;
     struct node *left;
     struct node *right;
     int height;
@@ -67,18 +67,19 @@ int height(struct node *N)
 }
  
 
-int max(int a, int b)
+int mymax(int a, int b)
 {
     return (a > b)? a : b;
 }
  
 
-struct node* newNode(int key,char* data)
+struct node* newNode(INT64 key,INT64 size.void* data)
 {
     struct node* node = (struct node*)
-                        kmalloc(sizeof(struct node));
+                        kmalloc(sizeof(struct node),__GPF_REPEAT);
     node->key   = key;
     node->left   = NULL;
+    node ->size=size;
     node->right  = NULL;
     node->data =   data;
     node->height = 1; 
@@ -96,8 +97,8 @@ struct node *rightRotate(struct node *y)
     y->left = T2;
  
  
-    y->height = max(height(y->left), height(y->right))+1;
-    x->height = max(height(x->left), height(x->right))+1;
+    y->height = mymax(height(y->left), height(y->right))+1;
+    x->height = mymax(height(x->left), height(x->right))+1;
  
 
     return x;
@@ -114,8 +115,8 @@ struct node *leftRotate(struct node *x)
     x->right = T2;
  
    
-    x->height = max(height(x->left), height(x->right))+1;
-    y->height = max(height(y->left), height(y->right))+1;
+    x->height = mymax(height(x->left), height(x->right))+1;
+    y->height = mymax(height(y->left), height(y->right))+1;
  
    
     return y;
@@ -129,20 +130,20 @@ int getBalance(struct node *N)
     return height(N->left) - height(N->right);
 }
  
-struct node* insert(struct node* node, int key,char *value)
+struct node* insert(struct node* node, INT64 key, INT64 size, void *value)
 {
    
     if (node == NULL)
-        return(newNode(key,value));
+        return(newNode(key,size, value));
 
  
     if (key < node->key)
-        node->left  = insert(node->left, key,value);
+        node->left  = insert(node->left, key,size,value);
     else
-        node->right = insert(node->right, key,value);
+        node->right = insert(node->right, key,size,value);
  
 
-    node->height = max(height(node->left), height(node->right)) + 1;
+    node->height = mymax(height(node->left), height(node->right)) + 1;
  
    
     int balance = getBalance(node);
@@ -178,16 +179,16 @@ struct node* insert(struct node* node, int key,char *value)
 
 struct node * minValueNode(struct node* node)
 {
-    struct node* current = node;
+    struct node* curr = node;
  
     
-    while (current->left != NULL)
-        current = current->left;
+    while (curr->left != NULL)
+        curr = curr->left;
  
-    return current;
+    return curr;
 }
  
-struct node* deleteNode(struct node* root, int key)
+struct node* deleteNode(struct node* root, INT64 key)
 {
    
  
@@ -220,7 +221,7 @@ struct node* deleteNode(struct node* root, int key)
             else 
              *root = *temp; 
  
-            free(temp);
+            kfree(temp);
         }
         else
         {
@@ -240,7 +241,7 @@ struct node* deleteNode(struct node* root, int key)
       return root;
  
     
-    root->height = max(height(root->left), height(root->right)) + 1;
+    root->height = mymax(height(root->left), height(root->right)) + 1;
  
     
     int balance = getBalance(root);
@@ -274,7 +275,7 @@ struct node* deleteNode(struct node* root, int key)
 
 
  
-struct node* search(struct node* root,int key)
+struct node* search(struct node* root,INT64 key)
 {
 if(root==NULL)
 {
@@ -301,27 +302,35 @@ static void free_callback(void *data)
 {
 }
 
+struct node *root=NULL;
+
 static long keyvalue_get(struct keyvalue_get __user *ukv)
 {
-    struct keyvalue_get kv;
-    
-    printk("%d",*ukv-> key)
-    
-
+    //struct keyvalue_get kv;
+    struct node *srchnode;
+    srchnode = search(root, ukv->key);
+    if(srchnode==NULL)
+        return -1;
+    ukv -> data=srchnode -> data;
+    ukv -> size=srchnode ->size;
+      
     return transaction_id++;
 }
 
 static long keyvalue_set(struct keyvalue_set __user *ukv)
 {
-    struct keyvalue_set kv;
-
+    //struct keyvalue_set kv;
+    root=insert(root, ukv->key, ukv->size, ukv->data);
     return transaction_id++;
 }
 
 static long keyvalue_delete(struct keyvalue_delete __user *ukv)
 {
-    struct keyvalue_delete kv;
-
+    //struct keyvalue_delete kv;
+    if(search(root, ukv ->key) ==NULL)
+        return -1
+    
+    root=deleteNode(root, ukv->key);
     return transaction_id++;
 }
 
