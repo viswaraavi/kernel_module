@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     }
   for(i = 0; i < number_of_transactions; i++)
     {
-        tid = kv_get(devfd,i,size,getdata);
+        tid = kv_get(devfd,i,&size,getdata);
         fprintf(stderr,"G\t%d\t%d\t%d\t%s\n",tid,i,size,(char*)getdata);
         
     }
