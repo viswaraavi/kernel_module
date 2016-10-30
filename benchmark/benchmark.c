@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     void *getdata;
     int tid;
     __u64 size;
-    char data[1024];
+    char data[number_of_keys][1024];
     int devfd;
     if(argc < 3)
     {
@@ -31,16 +31,16 @@ int main(int argc, char *argv[])
     // Initializing the keys
     for(i = 0; i < number_of_keys; i++)
     {
-        memset(data, 0, 1024);
+        memset(data[i], 0, 1024);
         a = rand();
-        sprintf(data,"%d",a);
-        tid = kv_set(devfd,i,strlen(data),data);
-        fprintf(stderr,"S\t%d\t%d\t%d\t%s\n",tid,i,strlen(data),data);
+        sprintf(data[i],"%d",a);
+        tid = kv_set(devfd,i,strlen(data[i]),data[i]);
+        fprintf(stderr,"S\t%d\t%d\t%d\t%s\n",tid,i,strlen(data[i]),data[i]);
     }
   for(i = 0; i < number_of_transactions; i++)
     {
-        tid = kv_get(devfd,i,&size,getdata);
-        fprintf(stderr,"G\t%d\t%d\t%d\t%s\n",tid,i,size,(char*)getdata);
+        tid = kv_get(devfd,i,&size,&a);
+        fprintf(stderr,"G\t%d\t%d\t%d\t%d\n",tid,i,size,a);
         
     }
     close(devfd);
