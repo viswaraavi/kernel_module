@@ -42,7 +42,7 @@
 #include <linux/moduleparam.h>
 #include <linux/poll.h>
 
-#define unsigned long long int INT64; 
+typedef unsigned long long int INT64; 
 
 unsigned int transaction_id;
 
@@ -142,7 +142,7 @@ struct node* insert(struct node* node, INT64 key, INT64 size, void *value)
     else if(key==node ->key)
     {
         node -> size=size;
-        node ->value=value;
+        node ->data=value;
           
     }
     
