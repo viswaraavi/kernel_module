@@ -1,2 +1,2 @@
-/home/vravi2/CSC501_KV/kernel_module/keyvalue.ko
-/home/vravi2/CSC501_KV/kernel_module/keyvalue.o
+/home/vravi2/kernel_module/kernel_module/keyvalue.ko
+/home/vravi2/kernel_module/kernel_module/keyvalue.o

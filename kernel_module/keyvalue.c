@@ -318,7 +318,8 @@ static long keyvalue_get(struct keyvalue_get __user *ukv)
     srchnode = search(root, ukv->key);
     if(srchnode==NULL)
         return -1;
-    ukv -> data=srchnode -> data;
+   copy_to_user(ukv -> data,srchnode->data,srchnode->size);
+   printk(KERN_ALERT "%s \n", ukv -> data);
     *(ukv -> size)=srchnode ->size;
       
     return transaction_id++;

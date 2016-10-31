@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 {
     int i=0,number_of_threads = 1, number_of_keys=1024, number_of_transactions = 65536; 
     int a;
-    void *getdata;
+    void *getdata[number_of_transactions];
     int tid;
     __u64 size;
     char data[number_of_keys][1024];
@@ -39,8 +39,9 @@ int main(int argc, char *argv[])
     }
   for(i = 0; i < number_of_transactions; i++)
     {
-        tid = kv_get(devfd,i,&size,&a);
-        fprintf(stderr,"G\t%d\t%d\t%d\t%d\n",tid,i,size,a);
+	getdata[i]=malloc(4*1024);
+        tid = kv_get(devfd,i,&size,getdata[i]);
+        fprintf(stderr,"G\t%d\t%d\t%d\t%s\n",tid,i,size,(char*)getdata[i]);
         
     }
     close(devfd);
