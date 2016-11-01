@@ -22,15 +22,20 @@
 //
 ////////////////////////////////////////////////////////////////////////
 //
-//   Author:  Hung-Wei Tseng
+//   Author:  Viswa Teja and Jeevan khetwani
 //
 //   Description:
-//     Skeleton of KeyValue Pseudo Device
+//     KeyValue Pseudo Device
 //
 ////////////////////////////////////////////////////////////////////////
 
-#include "keyvalue.h"
+//VISWA TEJA(vravi2)
+//JEEVAN KHETWANI(jhkhetwa)
 
+//The data structure used is Avl tree. The implementation is referred from geeksforgeeks. 
+
+
+#include "keyvalue.h"
 #include <asm/uaccess.h>
 #include <linux/slab.h> 
 #include <linux/kernel.h>
