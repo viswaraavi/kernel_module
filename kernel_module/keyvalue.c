@@ -195,7 +195,7 @@ struct node* insert(struct node* node, INT64 key, INT64 size, void *value)
  
  
 struct node* insert_helper(struct node* node, INT64 key, INT64 size, void *value){
-    down(&my_sem);
+    down_interruptible(&my_sem);
     return insert(node,key,size,value);
     up(&my_sem);
 }
@@ -320,7 +320,7 @@ return search(root->left,key );
 }
 
 struct node* search_helper(struct node* root,INT64 key){
-    down(&my_sem);
+    down_interruptible(&my_sem);
     return search(root,key);
     up(&my_sem);
     
@@ -359,7 +359,7 @@ static long keyvalue_delete(struct keyvalue_delete __user *ukv)
     //struct keyvalue_delete kv;
     if(search_helper(root, ukv ->key) ==NULL)
         return -1;
-    down(&my_sem);
+    down_interruptible(&my_sem);
     root=deleteNode(root, ukv->key);
     up(&my_sem);
     return transaction_id++;
