@@ -22,7 +22,7 @@
 //
 ////////////////////////////////////////////////////////////////////////
 //
-//   Author:  Viswa Teja and Jeevan khetwani
+//   Author:  Hung-Wei Tseng
 //
 //   Description:
 //     KeyValue Pseudo Device
@@ -47,13 +47,12 @@
 #include <linux/moduleparam.h>
 #include <linux/poll.h>
 #include <linux/rwsem.h>
-#include <linux/semaphore.h>
+#include <linux/spinlock.h>
 typedef unsigned long long int INT64; 
 
 unsigned int transaction_id;
-struct semaphore my_sem;
+static rwlock_t lock =__RW_LOCK_UNLOCKED(lock);
 
-sema_init(&my_sem,1);
 
 struct node
 {
@@ -195,9 +194,9 @@ struct node* insert(struct node* node, INT64 key, INT64 size, void *value)
  
  
 struct node* insert_helper(struct node* node, INT64 key, INT64 size, void *value){
-    down(&my_sem);
+    write_lock_bh(&lock);
     return insert(node,key,size,value);
-    up(&my_sem);
+    write_unlock_bh(&lock);
 }
 
 struct node * minValueNode(struct node* node)
@@ -320,9 +319,9 @@ return search(root->left,key );
 }
 
 struct node* search_helper(struct node* root,INT64 key){
-    down(&my_sem);
+    read_lock_bh(&lock);
     return search(root,key);
-    up(&my_sem);
+    read_unlock_bh(&lock);
     
 }
 
@@ -359,9 +358,9 @@ static long keyvalue_delete(struct keyvalue_delete __user *ukv)
     //struct keyvalue_delete kv;
     if(search_helper(root, ukv ->key) ==NULL)
         return -1;
-    down(&my_sem);
+    write_lock_bh(&lock);
     root=deleteNode(root, ukv->key);
-    up(&my_sem);
+    write_unlock_bh(&lock);
     return transaction_id++;
 }
 
@@ -426,4 +425,5 @@ MODULE_LICENSE("GPL");
 MODULE_VERSION("0.1");
 module_init(keyvalue_init);
 module_exit(keyvalue_exit);
+
 
