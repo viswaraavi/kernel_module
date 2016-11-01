@@ -41,10 +41,12 @@
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/poll.h>
-
+#include <linux/rwsem.h>
 typedef unsigned long long int INT64; 
 
 unsigned int transaction_id;
+struct rw_semaphore sem;
+init_rw
 
 struct node
 {
@@ -81,7 +83,8 @@ struct node* newNode(INT64 key,INT64 size,void* data)
     node->left   = NULL;
     node ->size=size;
     node->right  = NULL;
-    node->data =   data;
+    node->data = kmalloc(node-> size,__GFP_REPEAT);
+    copy_from_user(node -> data,data,size);
     node->height = 1; 
     return(node);
 }
@@ -142,7 +145,7 @@ struct node* insert(struct node* node, INT64 key, INT64 size, void *value)
     else if(key==node ->key)
     {
         node -> size=size;
-        node ->data=value;
+        copy_from_user(node->data,value,node ->size);
           
     }
     
