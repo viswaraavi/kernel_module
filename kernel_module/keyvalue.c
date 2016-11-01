@@ -51,7 +51,7 @@
 typedef unsigned long long int INT64; 
 
 unsigned int transaction_id;
-static rwlock_t lock =__RW_LOCK_UNLOCKED(lock);
+
 
 
 struct node
@@ -408,6 +408,7 @@ static struct miscdevice keyvalue_dev = {
 
 static int __init keyvalue_init(void)
 {
+    static rwlock_t lock =__RW_LOCK_UNLOCKED(lock);
     int ret;
 
     if ((ret = misc_register(&keyvalue_dev)))
