@@ -42,11 +42,12 @@
 #include <linux/moduleparam.h>
 #include <linux/poll.h>
 #include <linux/rwsem.h>
+#include <linux/spinlock.h>
 typedef unsigned long long int INT64; 
 
 unsigned int transaction_id;
-struct rw_semaphore sem;
-init_rw
+static rwlock_t lock =__RW_LOCK_UNLOCKED(lock);
+
 
 struct node
 {
@@ -186,6 +187,12 @@ struct node* insert(struct node* node, INT64 key, INT64 size, void *value)
     return node;
 }
  
+ 
+struct node* insert_helper(struct node* node, INT64 key, INT64 size, void *value){
+    write_lock_bh(&lock);
+    return insert(node,key,size,value);
+    write_unlock_bh(&lock);
+}
 
 struct node * minValueNode(struct node* node)
 {
@@ -306,6 +313,12 @@ return search(root->left,key );
 
 }
 
+struct node* search_helper(struct node* root,INT64 key){
+    read_lock_bh(&lock);
+    return search(root,key);
+    read_unlock_bh(&lock);
+    
+}
 
 
 static void free_callback(void *data)
@@ -318,7 +331,7 @@ static long keyvalue_get(struct keyvalue_get __user *ukv)
 {
     //struct keyvalue_get kv;
     struct node *srchnode;
-    srchnode = search(root, ukv->key);
+    srchnode = search_helper(root, ukv->key);
     if(srchnode==NULL)
         return -1;
    copy_to_user(ukv -> data,srchnode->data,srchnode->size);
@@ -331,17 +344,18 @@ static long keyvalue_get(struct keyvalue_get __user *ukv)
 static long keyvalue_set(struct keyvalue_set __user *ukv)
 {
     //struct keyvalue_set kv;
-    root=insert(root, ukv->key, ukv->size, ukv->data);
+    root=insert_helper(root, ukv->key, ukv->size, ukv->data);
     return transaction_id++;
 }
 
 static long keyvalue_delete(struct keyvalue_delete __user *ukv)
 {
     //struct keyvalue_delete kv;
-    if(search(root, ukv ->key) ==NULL)
+    if(search_helper(root, ukv ->key) ==NULL)
         return -1;
-    
+    write_lock_bh(&lock);
     root=deleteNode(root, ukv->key);
+    write_unlock_bh(&lock);
     return transaction_id++;
 }
 
